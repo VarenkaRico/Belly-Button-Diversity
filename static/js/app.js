@@ -6,7 +6,7 @@ function buildMetadata(sample){
   
   //------- Metadata Info
   d3.json(url_metadata).then(function(data){
-      //console.log(data.WFREQ);
+      console.log(data.WFREQ);
       //console.log("Metadata ", url_metadata);
 
       // Select the panel with id of `#sample-metadata` to include info
@@ -21,39 +21,39 @@ function buildMetadata(sample){
           row.text(`${k}:${v}`);
       });
   });
-}
-// console.log("OK")
-// BONUS: Build the Gauge Chart
 
-function buildGauge(sample){
-  var url_metadata=`/metadata/${sample}`;
-
+  //---------GAUGE Chart
   d3.json(url_metadata).then(function(data){
     var wwfreq=data.WFREQ;
-
+    console.log(data.WFREQ);
     //var gauge=d3.select("#gauge");
 
     var GaugeData =[{
       domain: { x: [0,1], y:[0,1]},
-      value: wwfreq,
+      value:wwfreq,
       title: {text: "Sample weekly washing frequency"},
       type: "indicator",
-      mode:"gauge+number",
+      mode:"gauge",
+      gauge: {axis: {range: [null, 9]},
       steps:[
-        {range: [0,1], color: "red"},
-        {range: [1-2], color:"lightred"},
-        {range: [2,3],color:"yellow"},
-        {range: [3,4],color:"lightyellow"},
+        {range: [0,1], color: "darkred"},
+        {range: [1,2], color:"red"},
+        {range: [2,3],color:"orange"},
+        {range: [3,4],color:"yellow"},
         {range:[4,5],color:"lightgreen"},
         {range:[5,6],color:"green"},
         {range:[6,7],color:"darkgreen"},
-        {range:[7,8],color:"lightblue"},
-        {range:[8,9],color:"blue"}
-      ]
+        {range:[7,8],color:"blue"},
+        {range:[8,9],color:"darkblue"}
+      ]}
+      
     }];
+    
     Plotly.newPlot("gauge",GaugeData)
   });
 }
+
+
 // buildGauge(data.WFREQ);
 
 // ------ PIE & BUBBLE CHARTS
