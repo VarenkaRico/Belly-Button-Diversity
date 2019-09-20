@@ -1,61 +1,106 @@
-function buildMetadata(sample) {
-
-  // @TODO: Complete the following function that builds the metadata panel
-
-  // Use `d3.json` to fetch the metadata for a sample
-  var metadata = `/metadata/${sample}`; //Gives the route for the sample selected
+//------- Individual Sample Metadata Info and Gauge Chart
+function buildMetadata(sample){
+    
+  // //Gives the route for the sample selected
+  var url_metadata=`/metadata/${sample}`;
   
-  d3.json(metadata).then(function(sample){
-    //console.log("Metadata ", metadata);
+  //------- Metadata Info
+  d3.json(url_metadata).then(function(data){
+      //console.log(data.WFREQ);
+      //console.log("Metadata ", url_metadata);
 
-    // Use d3 to select the panel with id of `#sample-metadata`
-    var sample_metadata=d3.select("#sample-metadata");
+      // Select the panel with id of `#sample-metadata` to include info
+      var sample_metadata=d3.select("#sample-metadata");
+      
+      // `.html("") to clear any existing metadata
+      sample_metadata.html("")
 
-    // Use `.html("") to clear any existing metadata
-    sample_metadata.html("");
-
-    // Use `Object.entries` to add each key and value pair to the panel
-    // Hint: Inside the loop, you will need to use d3 to append new
-    // tags for each key-value in the metadata.
-
-    Object.entries(sample).forEach(function([k,v]){ 
-      var row=sample_metadata.append("p");
-      row.text(`${k}:${v}`);
-      //console.log(sample.WFREQ);
-    });
-
-    var gauge=d3.select("#gauge");
-    var GaugeData = [
-     {
-       domain: { x:[0,1], y:[0,1]},
-       value:+sample.WFREQ,
-       type:"indicator",
-       mode:"gauge+number"
-      }
-
-   ];
-   var layout = {width:600,height:500};
-   Plotly.newPlot(gauge,GaugeData,layout)
-
+      // `Object.entries` to add each key and value pair to the panel
+      Object.entries(data).forEach(function([k,v]){
+          var row = sample_metadata.append("p");
+          row.text(`${k}:${v}`);
+      });
   });
-    
-  
-
-    
-
-    
-
-    // BONUS: Build the Gauge Chart
-    // buildGauge(data.WFREQ);
 }
+// console.log("OK")
+// BONUS: Build the Gauge Chart
 
+function buildGauge(sample){
+  var url_metadata=`/metadata/${sample}`;
+
+  d3.json(url_metadata).then(function(data){
+    var wwfreq=data.WFREQ;
+
+    //var gauge=d3.select("#gauge");
+
+    var GaugeData =[{
+      domain: { x: [0,1], y:[0,1]},
+      value: wwfreq,
+      title: {text: "Sample weekly washing frequency"},
+      type: "indicator",
+      mode:"gauge+number",
+      steps:[
+        {range: [0,1], color: "red"},
+        {range: [1-2], color:"lightred"},
+        {range: [2,3],color:"yellow"},
+        {range: [3,4],color:"lightyellow"},
+        {range:[4,5],color:"lightgreen"},
+        {range:[5,6],color:"green"},
+        {range:[6,7],color:"darkgreen"},
+        {range:[7,8],color:"lightblue"},
+        {range:[8,9],color:"blue"}
+      ]
+    }];
+    Plotly.newPlot("gauge",GaugeData)
+  });
+}
+// buildGauge(data.WFREQ);
+
+// ------ PIE & BUBBLE CHARTS
 function buildCharts(sample) {
 
   // @TODO: Use `d3.json` to fetch the sample data for the plots
-
+  var url_samples= `/samples/${sample}`;
+  console.log(sample);
+  
+  //---------PIE CHART
+  d3.json(url_samples).then(function(data){
+    //console.log(data.WFREQ);
+  
     // @TODO: Build a Bubble Chart using the sample data
 
     // @TODO: Build a Pie Chart
+    var labels = data.otu_ids.slice(0,10);
+    var hovertext = data.otu_labels.slice(0,10);
+    var values = data.sample_values.slice(0,10);
+
+    var data = [{
+      values: values,
+      labels: labels,
+      hovertext: hovertext,
+      type:"pie"
+    }];
+    Plotly.newPlot("pie",data);
+  });
+  
+  //---------BUBBLE CHART
+  d3.json(url_samples).then(function(data){
+    var x_values = data.otu_ids;
+    var y_values = data.sample_values;
+    var bubble_size = data.sample_values;
+    var color = data.otu_ids;
+    var text_values = data.otu_labels;
+
+    var data =[{
+      x: x_values,
+      y: y_values,
+      mode:"markers",
+      marker: {color: color, size: bubble_size},
+      text: text_values,
+
+    }];
+    Plotly.newPlot("bubble",data)
+  })
     // HINT: You will need to use slice() to grab the top 10 sample_values,
     // otu_ids, and labels (10 each).
 }
